@@ -16,6 +16,7 @@ from typing import (
 )
 from .utils import strip_optional
 from .reflection import Inspection, Parameter
+from .types import Binder, AbstractModule
 
 import attr
 
@@ -29,21 +30,35 @@ class Binding:
     service: type
     instance: Optional[Any] = None
     to: Optional[Any] = None
+    factory: Optional[Callable] = None
 
 
 T = TypeVar("T")
 
 
-class Kernel:
+class Kernel(Binder):
     def __init__(self) -> None:
-        self._bindings = DefaultDict[type, List[Binding]](list)
+        self._bindings: DefaultDict[type, List[Binding]] = DefaultDict(list)
 
-    def bind(self, service: Any, to: Any = None, instance: Any = None) -> None:
+    def bind(
+        self,
+        service: Any,
+        *,
+        to: Any = None,
+        factory: Callable = None,
+        instance: Any = None
+    ) -> None:
         """
         Configures a binding.
         """
-        binding = Binding(service=service, to=to, instance=instance)
+        binding = Binding(service=service, to=to, instance=instance, factory=factory)
         self._bindings[service].append(binding)
+
+    def install(self, module: AbstractModule) -> None:
+        """
+        Installs module into the kernel.
+        """
+        module.install_module(self)
 
     def get(self, interface: Type[T]) -> T:
         """
@@ -57,7 +72,7 @@ class Kernel:
         if binding.instance:
             return binding.instance
 
-        bound_to = binding.to or binding.service
+        bound_to = binding.to or binding.factory or binding.service
         inspection = Inspection.inspect(bound_to)
 
         def _resolve_param(param: Parameter) -> Any:

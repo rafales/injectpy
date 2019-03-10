@@ -1,10 +1,9 @@
 from injectpy import Kernel
-from tests.types import ISimpleEventBus, NoopEventBus
+from tests.types import ISimpleEventBus, NoopEventBus, IFileSystem, S3FileSystem
 
 # TODO: nice error when can't instantiate abstract class / protocol
 # TODO: detect circular dependencies
 # TODO: ensure that protocols work :)
-# TODO: add factory function support
 # TODO: "when" for contextual binding
 # TODO: scopes
 
@@ -98,3 +97,13 @@ class TestKernel:
         inst = kernel.get(MyHandler)
         assert isinstance(inst, MyHandler)
         assert isinstance(inst.bus, NoopEventBus)
+
+    def test_factory_function(self) -> None:
+        """
+        It's possible to pass a function which will create given instance.
+        """
+        kernel = Kernel()
+        kernel.bind(IFileSystem, factory=lambda: S3FileSystem())
+
+        inst = kernel.get(IFileSystem)  # type: ignore
+        assert isinstance(inst, S3FileSystem)

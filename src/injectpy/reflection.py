@@ -45,14 +45,18 @@ class Inspection:
     @staticmethod
     def inspect(obj: Any) -> "Inspection":
         if inspect.isclass(obj):
-            hints = get_type_hints(obj.__init__)
-            sig = inspect.signature(obj)
+            hints_source = obj.__init__
+        elif callable(obj):
+            hints_source = obj
+        else:
+            raise NotImplementedError(f"{obj!r} is not recognized by Kernel yet.")
 
-            return Inspection(
-                obj,
-                parameters=[
-                    Parameter.create(param, hints) for param in sig.parameters.values()
-                ],
-            )
+        hints = get_type_hints(hints_source)
+        sig = inspect.signature(obj)
 
-        raise NotImplementedError(f"{obj!r} is not recognized by Kernel yet.")
+        return Inspection(
+            obj,
+            parameters=[
+                Parameter.create(param, hints) for param in sig.parameters.values()
+            ],
+        )

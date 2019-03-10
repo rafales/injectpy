@@ -1,4 +1,4 @@
-## NewType pattern
+## NewType pattern ✅
 
 Sometimes we want to inject different instances into different classes. One way to do this is to use `NewType`:
 
@@ -6,7 +6,7 @@ Sometimes we want to inject different instances into different classes. One way 
 from typing import NewType
 from pathlib import PurePath, Path
 from mylib import IFileSystem, S3FileSystem, LocalFileSystem
-from injectpy import Container
+from injectpy import Kernel
 
 
 NetworkedFileSystem = NewType('NetworkedFileSystem', IFileSystem)
@@ -22,23 +22,32 @@ class MyUploader:
             self.output_fs.save(out_path, fp)
 
 
-container = Container()
-container.bind(IFileSystem, to=LocalFileSystem("./files/"))
-container.bind(NetworkedFileSystem, to=S3FileSystem())  # reads AWS_* env variables
+container = Kernel()
+container.bind(IFileSystem, instance=LocalFileSystem("./files/"))
+container.bind(NetworkedFileSystem, instance=S3FileSystem())  # reads AWS_* env variables
 
 uploader = container.get(MyUploader)
 assert isinstance(uploader.input_fs, LocalFileSystem)
 assert isinstance(uploader.output_fs, NetworkedFileSystem)
 ```
 
-## Module pattern
+## Module pattern ✅
 
 Instead of binding everything to a container - we can use a module - a separated piece of bindings:
 
 ```python
-from injectpy import Module, factory, Singleton
+from pathlib import Path
+from injectpy import Module, Kernel, Binder, factory
 
-... TODO finish me
+
+class MyModule(Module):
+    @factory()
+    def create_filesystem(self, settings: Settings) -> IFileSystem:
+        return LocalFileSystem(path=Path(settings['MEDIA_DIR']).resolve())
+
+    def configure(self, binder: Binder) -> None:
+        binder.bind(ISimpleEventBus, to=RedisEventBus)
+
 ```
 
 ## Contextual bindings
@@ -158,7 +167,7 @@ handler = container.get(HttpHandler)
 resp = handler.handle(FakeRequest('/'))
 ```
 
-## Using attrs / dataclasses
+## Using attrs / dataclasses ✅
 
 If you don't like injecting dependencies through `__init__` method due to some boilerplate you can use `attrs` or `dataclasses` library. You can define your classes using class annotations while the library will create proper constructor for you:
 
@@ -183,7 +192,7 @@ class UploadHandler(HttpHandler):  # works with abc's
         return {'ok': True}
 ```
 
-## Optional injection
+## Optional injection ✅
 
 Sometimes you wan't to handle situation where some dependency is only optional. In those situations you can set a default for an argument:
 

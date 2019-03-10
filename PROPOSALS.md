@@ -221,7 +221,29 @@ class UpdateProfile(HttpHandler):
 
 ## Activation actions
 
+TBD
+
 ## Scopes
+
+Instead of taking Ninject's approach to scopes we follow what AutoFac
+or .NET Core DI do. We have three kinds of lifetimes:
+
+- Singleton - only a single instance for the whole kernel
+- Scoped - instances live as long as a scope does
+- Transient - new instance is created every time
+
+Of those three two are pretty easy: singleton and transient. `Scoped` needs
+more explaining. Basically we do something like this:
+
+```python
+
+with kernel.new_scope() as scope:
+    db_session = scope.get(Session)
+    db_session.add(User(name="John"))
+    # db_session will be released at the end of the scope
+```
+
+TODO: figure out how to commit/rollback session based on error! Maybe some kind of a provider?
 
 ## Disposing / cleaning up
 
@@ -269,3 +291,5 @@ class MyCommand:
 ```
 
 ## Handling missing bindings
+
+TBD

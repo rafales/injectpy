@@ -38,7 +38,7 @@ class Kernel:
     def __init__(self) -> None:
         self._bindings = DefaultDict[type, List[Binding]](list)
 
-    def bind(self, service: Any, to: Any = None, instance: Any = None):
+    def bind(self, service: Any, to: Any = None, instance: Any = None) -> None:
         """
         Configures a binding.
         """
@@ -60,7 +60,7 @@ class Kernel:
         bound_to = binding.to or binding.service
         inspection = Inspection.inspect(bound_to)
 
-        def _resolve_param(param: Parameter):
+        def _resolve_param(param: Parameter) -> Any:
             assert param.hint is not None
             if param.has_default and param.hint not in self._bindings:
                 return None

@@ -13,7 +13,7 @@ from injectpy import Kernel
 NetworkedFileSystem = NewType("NetworkedFileSystem", IFileSystem)
 
 
-def test_new_type_usage():
+def test_new_type_usage() -> None:
     class MyHandler:
         def __init__(self, local: IFileSystem, networked: NetworkedFileSystem) -> None:
             self.local = local

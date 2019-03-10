@@ -10,7 +10,7 @@ from tests.types import ISimpleEventBus, NoopEventBus
 
 
 class TestKernel:
-    def test_self_binding_without_arguments(self):
+    def test_self_binding_without_arguments(self) -> None:
         """
         Simplest of all: class binds to itself and has no arguments.
         """
@@ -24,7 +24,7 @@ class TestKernel:
         inst = kernel.get(MyClass)
         assert isinstance(inst, MyClass)
 
-    def test_binding_to_other_class_without_arguments(self):
+    def test_binding_to_other_class_without_arguments(self) -> None:
         """
         You can bind an interface to a different class.
         """
@@ -41,7 +41,7 @@ class TestKernel:
         inst = kernel.get(MyInterface)
         assert isinstance(inst, MyImpl)
 
-    def test_type_hint_injection_for_self_bound_class(self):
+    def test_type_hint_injection_for_self_bound_class(self) -> None:
         """
         You can use type hints to specify other classes your class
         depends on.
@@ -62,7 +62,7 @@ class TestKernel:
         assert isinstance(inst, MyService)
         assert isinstance(inst.db, Database)
 
-    def test_optional_injection_when_missing(self):
+    def test_optional_injection_when_missing(self) -> None:
         """
         You can use a default value to make an injection optional.
 
@@ -82,7 +82,7 @@ class TestKernel:
         assert isinstance(inst, MyHandler)
         assert inst.bus is None
 
-    def test_optional_injection_when_bound(self):
+    def test_optional_injection_when_bound(self) -> None:
         """
         When dependency has a default value but it's present in
         container - fill it as usual.

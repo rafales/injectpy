@@ -2,7 +2,7 @@
 Checks using container with dataclasses.
 """
 import abc
-from typing import Optional
+from typing import Optional, Any
 import pytest
 from tests.types import (
     IFileSystem,
@@ -57,7 +57,7 @@ def test_works_with_abc() -> None:
     class CheckFileExists(HttpHandler):
         fs: IFileSystem
 
-        def handle(self, request: HttpRequest):
+        def handle(self, request: HttpRequest) -> Any:
             file_name = request.post["name"]
             return {"exists": self.fs.exists(file_name)}
 

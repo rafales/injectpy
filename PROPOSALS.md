@@ -167,6 +167,12 @@ handler = container.get(HttpHandler)
 resp = handler.handle(FakeRequest('/'))
 ```
 
+Note: while guice supports weird patterns for doing this - we want
+only to support list of bindings.
+
+If you need a more advanced pattern you can use factories and/or combine
+them with interceptors.
+
 ## Using attrs / dataclasses ✅
 
 If you don't like injecting dependencies through `__init__` method due to some boilerplate you can use `attrs` or `dataclasses` library. You can define your classes using class annotations while the library will create proper constructor for you:
@@ -241,6 +247,11 @@ with kernel.new_scope() as scope:
     db_session = scope.get(Session)
     db_session.add(User(name="John"))
     # db_session will be released at the end of the scope
+
+    # also this could be true using contextvars library:
+    assert kernel.current_scope is scope
+
+asssert kernel.current_scope is None
 ```
 
 TODO: figure out how to commit/rollback session based on error! Maybe some kind of a provider?
@@ -290,6 +301,33 @@ class MyCommand:
 
 ```
 
-## Handling missing bindings
+## Interceptors
+
+Sometimes we need to modify the class that container returns. A fine example would be a `WebRouter` class which needs to know about other classes that acutally implement routes. With interceptors you could plug into class creation process and modify it before it gets injected into the class like this:
+
+```python
+from injectpy import Module, intercept
+
+class MyModule(Module):
+    @intercept(WebRouter)
+    def init_web_router(self, router: WebRouter) -> None:
+        router.add(PostsController)
+        router.add(PostsAdminController, prefix='/admin')
+
+
+# somewhere else
+kernel = Kernel()
+kernel.install(WebModule)
+kernel.install(MyModule)
+
+# router has all routes registered through interceptors
+router = kernel.get(WebRouter)
+```
+
+## Generics
+
+TBD
+
+## Async
 
 TBD

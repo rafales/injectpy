@@ -225,10 +225,6 @@ class UpdateProfile(HttpHandler):
 # container.bind(IEventBus, MyEventBus, scope=Singleton)
 ```
 
-## Activation actions
-
-TBD
-
 ## Scopes
 
 Instead of taking Ninject's approach to scopes we follow what AutoFac
@@ -301,7 +297,7 @@ class MyCommand:
 
 ```
 
-## Interceptors
+## Interceptors / activation actions
 
 Sometimes we need to modify the class that container returns. A fine example would be a `WebRouter` class which needs to know about other classes that acutally implement routes. With interceptors you could plug into class creation process and modify it before it gets injected into the class like this:
 

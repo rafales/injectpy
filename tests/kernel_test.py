@@ -5,7 +5,6 @@ from tests.types import ISimpleEventBus, NoopEventBus, IFileSystem, S3FileSystem
 # TODO: detect circular dependencies
 # TODO: ensure that protocols work :)
 # TODO: "when" for contextual binding
-# TODO: scopes
 
 
 class TestKernel:
@@ -107,3 +106,26 @@ class TestKernel:
 
         inst = kernel.get(IFileSystem)  # type: ignore
         assert isinstance(inst, S3FileSystem)
+
+    def test_long_binding_chain(self) -> None:
+        """
+        You can create a binding chain that will span a couple of bindings.
+        """
+
+        class IReadOnlyDb:
+            pass
+
+        class IDb(IReadOnlyDb):
+            pass
+
+        class Db(IDb):
+            pass
+
+        kernel = Kernel()
+        kernel.bind(IReadOnlyDb, to=IDb)
+        kernel.bind(IDb, to=Db)
+
+        inst1 = kernel.get(IReadOnlyDb)
+        inst2 = kernel.get(IDb)
+        assert isinstance(inst1, Db)
+        assert isinstance(inst2, Db)

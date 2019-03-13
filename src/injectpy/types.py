@@ -1,5 +1,16 @@
 import abc
+import enum
 from typing import Any, Callable
+
+
+class Lifetime(enum.Enum):
+    """
+    Marks lifetime of an instance.
+    """
+
+    singleton = enum.auto()
+    transient = enum.auto()
+    scoped = enum.auto()
 
 
 class Binder(abc.ABC):
@@ -14,7 +25,8 @@ class Binder(abc.ABC):
         *,
         to: Any = None,
         factory: Callable = None,
-        instance: Any = None
+        instance: Any = None,
+        lifetime: Lifetime = Lifetime.transient,
     ) -> None:
         raise NotImplementedError
 

@@ -1,5 +1,7 @@
 import abc
 import inspect
+import threading
+import contextlib
 from typing import (
     Any,
     Callable,
@@ -40,8 +42,7 @@ T = TypeVar("T")
 
 
 class Scope:
-    def __init__(self, parent: Optional["Scope"], kernel: "Kernel") -> None:
-        self._parent = parent
+    def __init__(self, kernel: "Kernel") -> None:
         self._kernel = kernel
         self._instances: Dict[Any, Any] = OrderedDict()
 
@@ -61,7 +62,8 @@ class Scope:
 class Kernel(Binder):
     def __init__(self) -> None:
         self._bindings: DefaultDict[type, List[Binding]] = DefaultDict(list)
-        self._singleton = Scope(parent=None, kernel=self)
+        self._singleton: Dict[Any, Any] = OrderedDict()
+        self._singleton_lock = threading.RLock()
 
     def bind(
         self,
@@ -94,61 +96,66 @@ class Kernel(Binder):
         """
         Returns a new scope for scoped bindings.
         """
-        return Scope(parent=self._singleton, kernel=self)
+        return Scope(kernel=self)
 
     def get(self, interface: Type[T]) -> T:
         """
         Returns instance for given interface.
         """
-        return self._get(interface, scope=self._singleton)
+        return self._get(interface)
 
-    def _get(self, interface: Type[T], scope: Scope) -> T:
+    def _get(self, interface: Type[T], scope: Scope = None) -> T:
         try:
             binding = self._bindings[interface][-1]
         except IndexError:
             binding = Binding(interface)
 
-        if binding.lifetime == Lifetime.scoped and scope is self._singleton:
-            raise BindingIsScoped()
-
         if binding.instance:
             return binding.instance
 
-        if binding.lifetime != Lifetime.transient:
-            # try to find instance in scope
-            _scope: Optional[Scope] = scope
-            while _scope is not None:
-                if binding.service in _scope._instances:
-                    return _scope._instances[binding.service]
+        lock: Any = contextlib.nullcontext()
+        cache: Optional[Dict[Any, Any]] = None
 
-                _scope = _scope._parent
+        if binding.lifetime == Lifetime.singleton:
+            lock = self._singleton_lock
+            cache = self._singleton
+        elif binding.lifetime == Lifetime.scoped:
+            if scope is None:
+                # attempted to use scoped binding but no scope is active
+                raise BindingIsScoped()
 
-        if binding.to:
-            instance = self._get(binding.to, scope=scope)
-        else:
-            bound_to = binding.factory or binding.service
-            inspection = Inspection.inspect(bound_to)
+            cache = scope._instances
 
-            def _resolve_param(param: Parameter) -> Any:
-                assert param.hint is not None
-                if param.has_default and param.hint not in self._bindings:
-                    return None
+        if cache and binding.service in cache:
+            return cache[binding.service]
 
-                return self._get(param.hint, scope=scope)
+        with lock:
+            # double lock pattern for singleton scope
+            if cache and binding.service in cache:
+                return cache[binding.service]
 
-            arguments = {
-                param.name: _resolve_param(param)
-                for param in inspection.parameters
-                if param.hint is not None
-            }
+            if binding.to:
+                instance = self._get(binding.to, scope=scope)
+            else:
+                bound_to = binding.factory or binding.service
+                inspection = Inspection.inspect(bound_to)
 
-            instance = bound_to(**arguments)
+                def _resolve_param(param: Parameter) -> Any:
+                    assert param.hint is not None
+                    if param.has_default and param.hint not in self._bindings:
+                        return None
 
-        # if lifetime is not transient - then persist instance in proper scope
-        if binding.lifetime != Lifetime.transient:
-            target_scope = (
-                self._singleton if binding.lifetime == Lifetime.singleton else scope
-            )
-            target_scope._instances[binding.service] = instance
+                    return self._get(param.hint, scope=scope)
+
+                arguments = {
+                    param.name: _resolve_param(param)
+                    for param in inspection.parameters
+                    if param.hint is not None
+                }
+
+                instance = bound_to(**arguments)
+
+            if cache is not None:
+                cache[binding.service] = instance
 
         return instance

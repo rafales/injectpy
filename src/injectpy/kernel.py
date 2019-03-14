@@ -18,6 +18,7 @@ from collections import OrderedDict
 from .utils import strip_optional
 from .reflection import Inspection, Parameter
 from .types import Binder, AbstractModule, Lifetime
+from .exceptions import BindingIsScoped
 
 import attr
 
@@ -107,6 +108,9 @@ class Kernel(Binder):
         except IndexError:
             binding = Binding(interface)
 
+        if binding.lifetime == Lifetime.scoped and scope is self._singleton:
+            raise BindingIsScoped()
+
         if binding.instance:
             return binding.instance
 
@@ -120,7 +124,7 @@ class Kernel(Binder):
                 _scope = _scope._parent
 
         if binding.to:
-            instance = self._get(binding.to, scope=self._singleton)
+            instance = self._get(binding.to, scope=scope)
         else:
             bound_to = binding.factory or binding.service
             inspection = Inspection.inspect(bound_to)

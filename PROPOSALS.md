@@ -225,7 +225,7 @@ class UpdateProfile(HttpHandler):
 # container.bind(IEventBus, MyEventBus, scope=Singleton)
 ```
 
-## Scopes
+## Scopes ✅
 
 Instead of taking Ninject's approach to scopes we follow what AutoFac
 or .NET Core DI do. We have three kinds of lifetimes:
@@ -244,13 +244,8 @@ with kernel.new_scope() as scope:
     db_session.add(User(name="John"))
     # db_session will be released at the end of the scope
 
-    # also this could be true using contextvars library:
-    assert kernel.current_scope is scope
-
 asssert kernel.current_scope is None
 ```
-
-TODO: figure out how to commit/rollback session based on error! Maybe some kind of a provider?
 
 ## Disposing / cleaning up
 
@@ -261,7 +256,7 @@ Idea: just add `dispose` param:
 ```python
 
 # Option 1:
-container.bind(Session, to=make_session, dispose=lambda session: session.close())
+kernel.bind(Session, factory=make_session, dispose=lambda session: session.close())
 
 # Option 2:
 @contextlib.contextmanager
@@ -325,5 +320,9 @@ router = kernel.get(WebRouter)
 TBD
 
 ## Async
+
+TBD
+
+## Nesting scopes
 
 TBD

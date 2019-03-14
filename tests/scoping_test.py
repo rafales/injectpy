@@ -3,7 +3,7 @@ import itertools
 import threading
 from typing import Any, List
 import pytest
-from injectpy import Kernel, Lifetime
+from injectpy import Kernel, Lifetime, BindingIsScoped
 from tests.types import InMemoryFileSystem, IFileSystem
 
 
@@ -132,14 +132,14 @@ def test_scoped_with_chained_bindings() -> None:
     kernel.bind(InMemoryFileSystem, lifetime=Lifetime.scoped)
     kernel.bind(IFileSystem, to=InMemoryFileSystem)
 
-    with kernel.nested_scope():
+    with kernel.nested_scope() as scope:
         # because InMemoryFileSystem is scoped there can be only one
         # instance of it, even if we request something through two
         # different interfaces
-        inst1 = kernel.get(InMemoryFileSystem)
-        inst2 = kernel.get(IFileSystem)  # type: ignore
+        inst1 = scope.get(InMemoryFileSystem)
+        inst2 = scope.get(IFileSystem)  # type: ignore
 
-    assert inst1 is inst2
+        assert inst1 is inst2
 
 
 def test_chained_bindings_early_scoped() -> None:
@@ -152,13 +152,26 @@ def test_chained_bindings_early_scoped() -> None:
     kernel.bind(InMemoryFileSystem)
     kernel.bind(IFileSystem, to=InMemoryFileSystem, lifetime=Lifetime.scoped)
 
-    with kernel.nested_scope():
-        inst1 = kernel.get(IFileSystem)  # type: ignore
-        inst2 = kernel.get(InMemoryFileSystem)
+    with kernel.nested_scope() as scope:
+        inst1 = scope.get(IFileSystem)  # type: ignore
+        inst2 = scope.get(InMemoryFileSystem)
 
         # only "IFileSystem" is a singleton, so requesting InMemoryFileSystem should
         # give us different instance.
         assert inst1 is not inst2
+
+
+def test_getting_scoped_class_from_kernel_raises_error() -> None:
+    """
+    When you try to retrieve scoped class from kernel directly
+    you should get an error.
+    """
+    kernel = Kernel()
+
+    kernel.bind(InMemoryFileSystem, lifetime=Lifetime.scoped)
+
+    with pytest.raises(BindingIsScoped):
+        kernel.get(InMemoryFileSystem)
 
 
 def test_singleton_scope_is_thread_safe(request: Any) -> None:

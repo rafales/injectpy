@@ -315,6 +315,15 @@ kernel.install(MyModule)
 router = kernel.get(WebRouter)
 ```
 
+## Passing kwargs
+
+When you bind a class it may be useful to set arguments for a concrete class like this:
+
+```python
+
+kernel.bind(IFileSystem, to=LocalFileSystem, kwargs={'base_path': '/some/path'})
+```
+
 ## Generics
 
 TBD

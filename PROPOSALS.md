@@ -292,7 +292,7 @@ class MyCommand:
 
 ```
 
-## Interceptors / activation actions
+## Interceptors / activation actions ✅
 
 Sometimes we need to modify the class that container returns. A fine example would be a `WebRouter` class which needs to know about other classes that acutally implement routes. With interceptors you could plug into class creation process and modify it before it gets injected into the class like this:
 

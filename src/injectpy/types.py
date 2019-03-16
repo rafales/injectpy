@@ -1,6 +1,9 @@
 import abc
 import enum
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
+
+
+T = TypeVar("T")
 
 
 class Lifetime(enum.Enum):
@@ -40,6 +43,16 @@ class Binder(abc.ABC):
         instance: Any = None,
         lifetime: Lifetime = Lifetime.transient,
     ) -> None:
+        """
+        Removes all existing bindings for given service and adds new one.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def intercept(self, service: T, *, handler: Callable[[T], None]) -> None:
+        """
+        Attaches a function which can modify instance before it's returned.
+        """
         raise NotImplementedError
 
 

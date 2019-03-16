@@ -63,6 +63,7 @@ class Scope:
 class Kernel(Binder):
     def __init__(self) -> None:
         self._bindings: DefaultDict[type, List[Binding]] = DefaultDict(list)
+        self._interceptors: DefaultDict[Any, List[Callable]] = DefaultDict(list)
         self._singleton: Dict[Any, Any] = OrderedDict()
         self._singleton_lock = threading.RLock()
 
@@ -96,9 +97,6 @@ class Kernel(Binder):
         instance: Any = None,
         lifetime: Lifetime = Lifetime.transient,
     ) -> None:
-        """
-        Removes all existing bindings for given service and adds new one.
-        """
         self._bindings[service] = [
             Binding(
                 service=service,
@@ -108,6 +106,9 @@ class Kernel(Binder):
                 lifetime=lifetime,
             )
         ]
+
+    def intercept(self, service: T, *, handler: Callable[[T], None]) -> None:
+        self._interceptors[service].append(handler)
 
     def install(self, module: AbstractModule) -> None:
         """
@@ -178,7 +179,15 @@ class Kernel(Binder):
 
                 instance = bound_to(**arguments)
 
+            self._call_interceptors(binding.service, instance)
             if cache is not None:
                 cache[binding.service] = instance
 
         return instance
+
+    def _call_interceptors(self, service: Any, instance: Any) -> None:
+        if service not in self._interceptors:
+            return
+
+        for handler in self._interceptors[service]:
+            handler(instance)

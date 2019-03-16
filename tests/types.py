@@ -3,7 +3,7 @@ Set of useful types for testing purposes.
 """
 import abc
 import attr
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class IFileSystem(abc.ABC):
@@ -82,3 +82,21 @@ class ISimpleEventBus(abc.ABC):
 class NoopEventBus(ISimpleEventBus):
     def emit(self, name: str, params: Dict[str, Any]) -> None:
         pass
+
+
+class IWebRouter(abc.ABC):
+    """
+    A fake class for routing web requests :)
+    """
+
+    @abc.abstractmethod
+    def add_route(self, cls: type) -> None:
+        raise NotImplementedError
+
+
+class WebRouter(IWebRouter):
+    def __init__(self) -> None:
+        self.routes: List[type] = []
+
+    def add_route(self, cls: type) -> None:
+        self.routes.append(cls)

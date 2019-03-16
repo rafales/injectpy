@@ -5,6 +5,8 @@ from tests.types import (
     LocalFileSystem,
     NoopEventBus,
     S3FileSystem,
+    IWebRouter,
+    WebRouter,
 )
 
 # TODO: nice error when can't instantiate abstract class / protocol
@@ -159,3 +161,48 @@ class TestKernel:
 
         inst = kernel.get(IFileSystem)  # type: ignore
         assert isinstance(inst, S3FileSystem)
+
+    def test_interceptors_allow_you_to_modify_instances(self) -> None:
+        """
+        Interceptors allow us to modify instances of given service
+        before it gets returned.
+        """
+
+        class MyRoute:
+            pass
+
+        def handler(router: WebRouter) -> None:
+            router.add_route(MyRoute)
+
+        kernel = Kernel()
+        kernel.intercept(WebRouter, handler=handler)
+        inst = kernel.get(WebRouter)
+
+        assert inst.routes == [MyRoute]
+
+    def test_interceptors_can_be_chained(self) -> None:
+        """
+        Interceptors must chain.
+        """
+
+        class MyRoute1:
+            pass
+
+        class MyRoute2:
+            pass
+
+        def handler1(router: WebRouter) -> None:
+            router.add_route(MyRoute1)
+
+        def handler2(router: IWebRouter) -> None:
+            router.add_route(MyRoute2)
+
+        kernel = Kernel()
+        kernel.bind(IWebRouter, to=WebRouter)
+        kernel.intercept(WebRouter, handler=handler1)
+        kernel.intercept(IWebRouter, handler=handler2)
+
+        inst = kernel.get(IWebRouter)  # type: ignore
+
+        assert isinstance(inst, WebRouter)
+        assert inst.routes == [MyRoute1, MyRoute2]

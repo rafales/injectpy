@@ -2,18 +2,20 @@
 Checks using container with attrs library.
 """
 import abc
+from typing import Any, Optional
+
 import attr
-from typing import Optional, Any
 import pytest
+
+from injectpy import Kernel
 from tests.types import (
-    IFileSystem,
     HttpHandler,
     HttpRequest,
-    ISimpleEventBus,
+    IFileSystem,
     InMemoryFileSystem,
+    ISimpleEventBus,
     NoopEventBus,
 )
-from injectpy import Kernel
 
 
 def test_discovers_dependencies_correctly() -> None:

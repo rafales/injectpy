@@ -1,10 +1,12 @@
-import sys
 import itertools
+import sys
 import threading
 from typing import Any, List
+
 import pytest
-from injectpy import Kernel, Lifetime, BindingIsScoped
-from tests.types import InMemoryFileSystem, IFileSystem
+
+from injectpy import BindingIsScoped, Kernel, Lifetime
+from tests.types import IFileSystem, InMemoryFileSystem
 
 
 def test_transient_scoping() -> None:

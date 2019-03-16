@@ -1,7 +1,6 @@
 import abc
 import enum
-from typing import Any, Callable, TypeVar, Type
-
+from typing import Any, Callable, Type, TypeVar
 
 T = TypeVar("T")
 

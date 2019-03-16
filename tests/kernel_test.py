@@ -2,10 +2,10 @@ from injectpy import Kernel
 from tests.types import (
     IFileSystem,
     ISimpleEventBus,
+    IWebRouter,
     LocalFileSystem,
     NoopEventBus,
     S3FileSystem,
-    IWebRouter,
     WebRouter,
 )
 

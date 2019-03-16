@@ -1,5 +1,6 @@
 from injectpy import Kernel, Module, intercept
-from .types import WebRouter, IWebRouter
+
+from .types import IWebRouter, WebRouter
 
 
 def test_interceptors_allow_you_to_modify_instances() -> None:

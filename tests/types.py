@@ -2,8 +2,9 @@
 Set of useful types for testing purposes.
 """
 import abc
+from typing import Any, Dict, List
+
 import attr
-from typing import Dict, Any, List
 
 
 class IFileSystem(abc.ABC):

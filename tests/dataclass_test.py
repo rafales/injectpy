@@ -2,17 +2,19 @@
 Checks using container with dataclasses.
 """
 import abc
-from typing import Optional, Any
+from typing import Any, Optional
+
 import pytest
+
+from injectpy import Kernel
 from tests.types import (
-    IFileSystem,
     HttpHandler,
     HttpRequest,
-    ISimpleEventBus,
+    IFileSystem,
     InMemoryFileSystem,
+    ISimpleEventBus,
     NoopEventBus,
 )
-from injectpy import Kernel
 
 try:
     import dataclasses as dc

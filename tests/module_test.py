@@ -1,5 +1,5 @@
-from injectpy import Kernel, Module, Binder, factory
-from tests.types import IFileSystem, S3FileSystem, InMemoryFileSystem
+from injectpy import Binder, Kernel, Module, factory
+from tests.types import IFileSystem, InMemoryFileSystem, S3FileSystem
 
 
 def test_factory_decorator() -> None:

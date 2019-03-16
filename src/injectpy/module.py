@@ -2,12 +2,13 @@
 Modular configuration for container.
 """
 import inspect
-from typing import TypeVar, Callable, Any, get_type_hints, Optional, Type, Union
-from typing_extensions import Protocol
-import attr
-from .types import AbstractModule, Binder
-from .reflection import Inspection
+from typing import Any, Callable, Optional, Type, TypeVar, Union, get_type_hints
 
+import attr
+from typing_extensions import Protocol
+
+from .reflection import Inspection
+from .types import AbstractModule, Binder
 
 T = TypeVar("T")
 TFn = TypeVar("TFn", bound=Callable)

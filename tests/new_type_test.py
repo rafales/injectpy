@@ -3,9 +3,9 @@ Pattern for distinguishing between different usages of the same type
 by using typing.NewType.
 """
 from typing import NewType
-from tests.types import IFileSystem, InMemoryFileSystem, S3FileSystem
-from injectpy import Kernel
 
+from injectpy import Kernel
+from tests.types import IFileSystem, InMemoryFileSystem, S3FileSystem
 
 # so: we want to have two file systems in our app: local one (on server)
 # and some remote place like S3. To distinguish those two we use NewType()

@@ -1,6 +1,6 @@
 import pytest
-from injectpy import Kernel, Module, intercept
 
+from injectpy import Kernel, Module, intercept
 from tests.types import IWebRouter, WebRouter
 
 

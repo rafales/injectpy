@@ -1,5 +1,6 @@
+from typing import List, Optional, Union
+
 from injectpy.utils import strip_optional
-from typing import Union, List, Optional
 
 
 class TestStripOptional:

@@ -1,7 +1,8 @@
 import abc
+import contextlib
 import inspect
 import threading
-import contextlib
+from collections import OrderedDict
 from typing import (
     Any,
     Callable,
@@ -10,19 +11,19 @@ from typing import (
     List,
     NewType,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
-    Tuple,
     get_type_hints,
 )
-from collections import OrderedDict
-from .utils import strip_optional
-from .reflection import Inspection, Parameter
-from .types import Binder, AbstractModule, Lifetime
-from .exceptions import BindingIsScoped
 
 import attr
+
+from .exceptions import BindingIsScoped
+from .reflection import Inspection, Parameter
+from .types import AbstractModule, Binder, Lifetime
+from .utils import strip_optional
 
 
 @attr.dataclass(frozen=True)
@@ -85,6 +86,28 @@ class Kernel(Binder):
             lifetime=lifetime,
         )
         self._bindings[service].append(binding)
+
+    def rebind(
+        self,
+        service: Any,
+        *,
+        to: Any = None,
+        factory: Callable = None,
+        instance: Any = None,
+        lifetime: Lifetime = Lifetime.transient,
+    ) -> None:
+        """
+        Removes all existing bindings for given service and adds new one.
+        """
+        self._bindings[service] = [
+            Binding(
+                service=service,
+                to=to,
+                instance=instance,
+                factory=factory,
+                lifetime=lifetime,
+            )
+        ]
 
     def install(self, module: AbstractModule) -> None:
         """

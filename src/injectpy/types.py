@@ -30,6 +30,18 @@ class Binder(abc.ABC):
     ) -> None:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def rebind(
+        self,
+        service: Any,
+        *,
+        to: Any = None,
+        factory: Callable = None,
+        instance: Any = None,
+        lifetime: Lifetime = Lifetime.transient,
+    ) -> None:
+        raise NotImplementedError
+
 
 class AbstractModule(abc.ABC):
     """

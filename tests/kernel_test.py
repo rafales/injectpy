@@ -1,5 +1,11 @@
 from injectpy import Kernel
-from tests.types import ISimpleEventBus, NoopEventBus, IFileSystem, S3FileSystem
+from tests.types import (
+    IFileSystem,
+    ISimpleEventBus,
+    LocalFileSystem,
+    NoopEventBus,
+    S3FileSystem,
+)
 
 # TODO: nice error when can't instantiate abstract class / protocol
 # TODO: detect circular dependencies
@@ -129,3 +135,27 @@ class TestKernel:
         inst2 = kernel.get(IDb)
         assert isinstance(inst1, Db)
         assert isinstance(inst2, Db)
+
+    def test_rebind_changes_binding(self) -> None:
+        """
+        You can use rebind() to change existing binding.
+        It's useful mainly for testing purposes.
+        """
+        kernel = Kernel()
+
+        kernel.bind(IFileSystem, to=S3FileSystem)
+        kernel.rebind(IFileSystem, to=LocalFileSystem)
+
+        inst = kernel.get(IFileSystem)  # type: ignore
+        assert isinstance(inst, LocalFileSystem)
+
+    def test_rebind_doesnt_crash_if_binding_does_not_exist(self) -> None:
+        """
+        rebind() should not crash if binding doesn't already exist.
+        """
+        kernel = Kernel()
+
+        kernel.rebind(IFileSystem, to=S3FileSystem)
+
+        inst = kernel.get(IFileSystem)  # type: ignore
+        assert isinstance(inst, S3FileSystem)

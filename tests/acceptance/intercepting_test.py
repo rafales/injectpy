@@ -1,6 +1,7 @@
+import pytest
 from injectpy import Kernel, Module, intercept
 
-from .types import IWebRouter, WebRouter
+from tests.types import IWebRouter, WebRouter
 
 
 def test_interceptors_allow_you_to_modify_instances() -> None:
@@ -69,3 +70,32 @@ def test_module_registers_interceptors() -> None:
 
     assert isinstance(inst, WebRouter)
     assert inst.routes == [MyRoute1]
+
+
+def test_error_when_first_parameter_is_untyped() -> None:
+    """
+    An exception must be raised if first parameter is not typed properly.
+    """
+    with pytest.raises(RuntimeError) as info:
+
+        class MyModule(Module):
+            @intercept()
+            def my_interceptor(self, something):  # type: ignore
+                pass
+
+    assert str(info.value) == "'my_interceptor' has untyped first argument 'something'"
+
+
+def test_error_when_cant_locale_first_parameter() -> None:
+    """
+    If method doesn't have first param then we need to raise an error.
+    """
+
+    with pytest.raises(RuntimeError) as info:
+
+        class MyModule(Module):
+            @intercept()  # type: ignore
+            def my_interceptor(self) -> None:
+                pass
+
+    assert str(info.value) == "'my_interceptor' has no first positional argument"

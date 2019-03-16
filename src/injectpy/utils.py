@@ -1,7 +1,7 @@
 from typing import Any, Tuple, Union
 
 
-def strip_optional(hint: Any) -> Tuple[bool, Any]:
+def strip_optional(hint: Any) -> Tuple[Any, bool]:
     """
     Strips Optional[] from type hint.
 

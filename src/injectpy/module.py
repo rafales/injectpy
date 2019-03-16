@@ -62,13 +62,15 @@ def get_first_hint(cb: Callable) -> Any:
     positional = [param for param in inspection.parameters if param.is_positional()]
 
     try:
-        # we omit
-        hint = positional[1].hint
-        if hint is None:
-            raise RuntimeError(f"{cb.__name__} has untyped first argument")
-        return hint
+        # we omit "self"
+        param = positional[1]
+        if param.hint is None:
+            raise RuntimeError(
+                f"'{cb.__name__}' has untyped first argument '{param.name}'"
+            )
+        return param.hint
     except IndexError:
-        raise RuntimeError(f"{cb.__name__} has no first positional argument")
+        raise RuntimeError(f"'{cb.__name__}' has no first positional argument")
 
 
 class Module(AbstractModule):

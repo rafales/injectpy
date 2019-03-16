@@ -20,6 +20,8 @@ class Parameter:
     hint: Optional[Any]
     #: if it was an union of Something and None.
     is_optional: bool
+    #: parameter kind
+    kind: inspect._ParameterKind
 
     @staticmethod
     def create(param: inspect.Parameter, hints: Dict[str, Any]) -> "Parameter":
@@ -34,7 +36,11 @@ class Parameter:
             has_default=param.default is not inspect.Parameter.empty,
             hint=hint,
             is_optional=is_optional,
+            kind=param.kind,
         )
+
+    def is_positional(self) -> bool:
+        return self.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
 
 
 @attr.dataclass(frozen=True)

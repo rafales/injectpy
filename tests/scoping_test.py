@@ -53,7 +53,7 @@ def test_singleton_from_transient() -> None:
     # note: singleton applies to "IFileSystem" here, not "InMemoryFileSystem"
     kernel.bind(IFileSystem, to=InMemoryFileSystem, lifetime=Lifetime.singleton)
 
-    sing1 = kernel.get(IFileSystem)
+    sing1 = kernel.get(IFileSystem)  # type: ignore
     inst1 = kernel.get(MyHandler)
     inst2 = kernel.get(MyHandler)
 

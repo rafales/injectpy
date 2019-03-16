@@ -107,7 +107,7 @@ class Kernel(Binder):
             )
         ]
 
-    def intercept(self, service: T, *, handler: Callable[[T], None]) -> None:
+    def intercept(self, service: Type[T], *, handler: Callable[[T], None]) -> None:
         self._interceptors[service].append(handler)
 
     def install(self, module: AbstractModule) -> None:

@@ -1,6 +1,6 @@
 import abc
 import enum
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, Type
 
 
 T = TypeVar("T")
@@ -49,7 +49,7 @@ class Binder(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def intercept(self, service: T, *, handler: Callable[[T], None]) -> None:
+    def intercept(self, service: Type[T], *, handler: Callable[[T], None]) -> None:
         """
         Attaches a function which can modify instance before it's returned.
         """

@@ -3,9 +3,10 @@ InjectPy
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
+    attrs
 
 
 Indices and tables

@@ -6,6 +6,7 @@ InjectPy
     :maxdepth: 2
     :caption: Contents:
 
+    lifetime
     attrs
 
 

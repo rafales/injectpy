@@ -173,31 +173,6 @@ only to support list of bindings.
 If you need a more advanced pattern you can use factories and/or combine
 them with interceptors.
 
-## Using attrs / dataclasses ✅
-
-If you don't like injecting dependencies through `__init__` method due to some boilerplate you can use `attrs` or `dataclasses` library. You can define your classes using class annotations while the library will create proper constructor for you:
-
-```python
-import abc
-import attr
-
-
-class HttpHandler(abc.ABC):
-    @abc.abstractmethod
-    def handle(self, req: Request):
-        raise NotImplementedError
-
-
-@attr.dataclass()
-class UploadHandler(HttpHandler):  # works with abc's
-    fs: IFileSystem
-
-    def handle(self, req: Request):
-        file_name = PurePath('uploads', str(uuid.uuid4()))
-        self.fs.save(file_name, req.files['file'])
-        return {'ok': True}
-```
-
 ## Optional injection ✅
 
 Sometimes you wan't to handle situation where some dependency is only optional. In those situations you can set a default for an argument:

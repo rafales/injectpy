@@ -8,7 +8,7 @@ import attr
 from typing_extensions import Protocol
 
 from .reflection import Inspection
-from .types import AbstractModule, Binder
+from .types import AbstractModule, Binder, Lifetime
 
 T = TypeVar("T")
 TFn = TypeVar("TFn", bound=Callable)
@@ -18,6 +18,7 @@ INFO_ATTRIB_NAME = "__injectpy__info__"
 @attr.dataclass()
 class FactoryInfo:
     service: Any
+    lifetime: Lifetime
 
 
 @attr.dataclass()
@@ -25,13 +26,13 @@ class InterceptInfo:
     service: Any
 
 
-def factory() -> Callable[[TFn], TFn]:
+def factory(*, lifetime: Lifetime = Lifetime.transient) -> Callable[[TFn], TFn]:
     """
     Marks method of a Module as a factory function.
     """
 
     def decorator(fn: TFn) -> TFn:
-        info = FactoryInfo(service=get_returned_type(fn))
+        info = FactoryInfo(service=get_returned_type(fn), lifetime=lifetime)
         setattr(fn, INFO_ATTRIB_NAME, info)
         return fn
 
@@ -79,7 +80,7 @@ class Module(AbstractModule):
         for _, meth in inspect.getmembers(self, inspect.ismethod):
             info = getattr(meth, INFO_ATTRIB_NAME, None)
             if isinstance(info, FactoryInfo):
-                binder.bind(info.service, factory=meth)
+                binder.bind(info.service, factory=meth, lifetime=info.lifetime)
             elif isinstance(info, InterceptInfo):
                 binder.intercept(info.service, handler=meth)
 

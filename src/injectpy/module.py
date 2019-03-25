@@ -2,10 +2,9 @@
 Modular configuration for container.
 """
 import inspect
-from typing import Any, Callable, Optional, Type, TypeVar, Union, get_type_hints
+from typing import Any, Callable, TypeVar, Union, get_type_hints
 
 import attr
-from typing_extensions import Protocol
 
 from .reflection import Inspection
 from .types import AbstractModule, Binder, Lifetime

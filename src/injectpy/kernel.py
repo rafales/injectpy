@@ -1,6 +1,4 @@
-import abc
 import contextlib
-import inspect
 import threading
 from collections import OrderedDict
 from typing import (
@@ -9,13 +7,9 @@ from typing import (
     DefaultDict,
     Dict,
     List,
-    NewType,
     Optional,
-    Tuple,
     Type,
     TypeVar,
-    Union,
-    get_type_hints,
 )
 
 import attr
@@ -23,7 +17,6 @@ import attr
 from .exceptions import BindingIsScoped
 from .reflection import Inspection, Parameter
 from .types import AbstractModule, Binder, Lifetime
-from .utils import strip_optional
 
 
 @attr.dataclass(frozen=True)

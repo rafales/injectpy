@@ -173,33 +173,6 @@ only to support list of bindings.
 If you need a more advanced pattern you can use factories and/or combine
 them with interceptors.
 
-## Optional injection ✅
-
-Sometimes you wan't to handle situation where some dependency is only optional. In those situations you can set a default for an argument:
-
-```python
-import abc
-
-
-class IEventBus(abc.ABC):
-    def emit(self, name: str, params: Dict[str, Any]) -> None:
-        raise NotImplementedError
-
-
-class UpdateProfile(HttpHandler):
-    def __init__(self, event_bus: IEventBus = None) -> None:
-        self.event_bus = event_bus
-
-    def handle(self, req: Request):
-        # ...
-        if self.event_bus is not None:
-            self.event_bus.emit('profile-updated', {'...': '...'})
-
-
-## when we comment this line out - container will omit 'event_bus' when constructing UpdateProfile instance.
-# container.bind(IEventBus, MyEventBus, scope=Singleton)
-```
-
 ## Scopes ✅
 
 Instead of taking Ninject's approach to scopes we follow what AutoFac
@@ -217,9 +190,8 @@ more explaining. Basically we do something like this:
 with kernel.new_scope() as scope:
     db_session = scope.get(Session)
     db_session.add(User(name="John"))
-    # db_session will be released at the end of the scope
+    db_session.commit()
 
-asssert kernel.current_scope is None
 ```
 
 ## Disposing / cleaning up
@@ -244,6 +216,16 @@ def make_session():
 
 container.bind(Session, to=make_session, dispose=True)
 ```
+
+Actually, disposing / cleaning up may not be even needed (although dispose
+handler may be useful).
+
+What is more important is a "transaction manager" which handles commits and
+rollbacks and which can be done automatically by web framework or cli framework.
+
+Transaction manager can handle the database, file output, sending tasks to
+task broker etc. Something similar exists in python in `transaction`
+package: https://pypi.org/project/transaction/
 
 ## Union bindings
 

@@ -194,39 +194,6 @@ with kernel.new_scope() as scope:
 
 ```
 
-## Disposing / cleaning up
-
-Some instances must be cleaned up. C# has a concept of "disposing" which works great with ninject. Python has different mechanism - `with` (or `__enter__` / `__exit__`). But that would not work as equally good.
-
-Idea: just add `dispose` param:
-
-```python
-
-# Option 1:
-kernel.bind(Session, factory=make_session, dispose=lambda session: session.close())
-
-# Option 2:
-@contextlib.contextmanager
-def make_session():
-    session = Session()
-    try:
-        yield session
-    finally:
-        session.close()
-
-container.bind(Session, to=make_session, dispose=True)
-```
-
-Actually, disposing / cleaning up may not be even needed (although dispose
-handler may be useful).
-
-What is more important is a "transaction manager" which handles commits and
-rollbacks and which can be done automatically by web framework or cli framework.
-
-Transaction manager can handle the database, file output, sending tasks to
-task broker etc. Something similar exists in python in `transaction`
-package: https://pypi.org/project/transaction/
-
 ## Union bindings
 
 What if we could accept two different interfaces, depending on what's available
